@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+    nginx:
+      image: nginx:latest
+      ports:
+        - "8080:80"
+
+    filebeat:
+      build: ./filebeat
+      volumes:
+        - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+        - /var/run/docker.sock:/var/run/docker.sock
+
+    logstash:
+      image: docker.elastic.co/logstash/logstash:7.5.0
+      expose:
+        - "5044"
+      volumes:
+        - ./logstash/pipeline:/usr/share/logstash/pipeline
+        #- ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
+
+    elasticsearch:
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+      ports:
+        - "9200:9200"
+      environment:
+        http.host: 0.0.0.0
+        discovery.type: single-node
+        ES_JAVA_OPTS: "-Xms750m -Xmx750m"
+
+    kibana:
+      image: docker.elastic.co/kibana/kibana:7.5.0
+      ports:
+        - "5601:5601"

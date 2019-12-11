@@ -1,0 +1,21 @@
+filebeat.inputs:
+- type: log
+  paths:
+  - /var/log/nginx/access.log
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        - condition:
+          not:
+            contains:
+              docker.container.image: docker.elastic.co
+          config:
+            - type: container
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              exclude_lines: ["^\\s+[\\-`('.|_]"]  # drop asciiart lines
+
+output.logstash:
+    hosts: ["logstash:5044"]
