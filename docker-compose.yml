@@ -11,11 +11,15 @@ services:
       volumes:
         - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
         - /var/run/docker.sock:/var/run/docker.sock
+        #Mount the docker logs for indexing by filebeat
+        - /var/lib/docker/containers:/hostfs/var/lib/docker/containers
 
     logstash:
       image: docker.elastic.co/logstash/logstash:7.5.0
       expose:
         - "5044"
+      environment:
+        LOG_LEVEL: debug
       volumes:
         - ./logstash/pipeline:/usr/share/logstash/pipeline
         #- ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
